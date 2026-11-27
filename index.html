@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>Ruang Belajar — Peta Materi</title>
+  <style>
+    :root {
+      --paper: #f6f7f2;
+      --white: #fff;
+      --ink: #1d2925;
+      --muted: #748079;
+      --line: #e6e9e2;
+      --green: #245c46;
+      --green-soft: #e8f1e9;
+      --blue: #4667a8;
+      --blue-soft: #edf1fa;
+      --orange: #bd6b39;
+      --orange-soft: #faf0e8;
+      --shadow: 0 16px 50px rgba(32, 48, 39, .07);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .shell { max-width: 1280px; margin: auto; padding: 0 36px; }
+
+    .topbar {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 750; letter-spacing: -.03em; }
+    .brand-mark {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      background: var(--green); color: white; border-radius: 11px; font-size: 18px;
+    }
+    .top-meta { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 12px; }
+    .semester { border: 1px solid var(--line); padding: 7px 11px; border-radius: 99px; color: var(--ink); background: rgba(255,255,255,.55); }
+
+    .hero {
+      display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 36px;
+      align-items: end; padding: 58px 0 42px;
+    }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(36px, 5vw, 58px); letter-spacing: -.065em; line-height: 1.04; font-weight: 720; }
+    .hero-copy { max-width: 600px; margin: 0; color: var(--muted); font-size: 16px; }
+    .progress-card { padding: 20px; border-radius: 18px; background: var(--white); box-shadow: var(--shadow); }
+    .progress-top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; }
+    .progress-top span:last-child { color: var(--green); }
+    .progress-track { height: 7px; overflow: hidden; margin: 14px 0 9px; border-radius: 8px; background: #edf0ea; }
+    .progress-fill { width: 0; height: 100%; background: var(--green); border-radius: inherit; transition: width .25s ease; }
+    .progress-note { color: var(--muted); font-size: 11px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+    .tabs { display: flex; gap: 7px; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 15px; border: 1px solid transparent; border-radius: 99px; background: transparent;
+      color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 650; transition: .18s ease;
+    }
+    .tab:hover { color: var(--ink); background: #ecefe9; }
+    .tab.active { color: white; background: var(--ink); }
+    .search-wrap { position: relative; width: min(290px, 100%); }
+    .search-wrap svg { position: absolute; top: 50%; left: 13px; width: 16px; transform: translateY(-50%); color: #8a948d; pointer-events: none; }
+    .search { width: 100%; padding: 10px 13px 10px 38px; border: 1px solid var(--line); border-radius: 12px; outline: none; background: white; font-size: 13px; }
+    .search:focus { border-color: #9ab6a1; box-shadow: 0 0 0 3px rgba(36,92,70,.08); }
+
+    .subject-section { margin: 0 0 44px; }
+    .subject-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .subject-title-wrap { display: flex; align-items: center; gap: 11px; }
+    .subject-icon { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; font-size: 17px; }
+    .math .subject-icon { background: var(--green-soft); color: var(--green); }
+    .chem .subject-icon { background: var(--orange-soft); color: var(--orange); }
+    .physics .subject-icon { background: var(--blue-soft); color: var(--blue); }
+    .subject-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.035em; }
+    .subject-heading p { margin: 1px 0 0; color: var(--muted); font-size: 11px; }
+    .count { color: var(--muted); font-size: 11px; }
+    .chapter-label {
+      display: flex; align-items: center; gap: 10px; margin: 22px 0 10px;
+      color: #68746d; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .chapter-label::after { height: 1px; flex: 1; background: var(--line); content: ""; }
+    .topic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+    .topic {
+      position: relative; display: flex; flex-direction: column; min-height: 136px; padding: 16px;
+      border: 1px solid var(--line); border-radius: 15px; background: var(--white);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .topic:hover { transform: translateY(-2px); border-color: #d7dfd6; box-shadow: 0 10px 28px rgba(32,48,39,.06); }
+    .topic-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .topic-number { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .06em; }
+    .topic-tag { padding: 3px 7px; border-radius: 6px; background: #f2f4ef; color: #69756e; font-size: 9px; font-weight: 700; }
+    .topic h3 { margin: 12px 0 7px; font-size: 14px; line-height: 1.35; letter-spacing: -.02em; }
+    .topic p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .topic-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: auto; padding-top: 15px; }
+    .topic-hint { color: #98a19b; font-size: 10px; }
+    .learn-button {
+      padding: 5px 8px; border: 0; border-radius: 8px; background: var(--green-soft);
+      color: var(--green); cursor: pointer; font-size: 10px; font-weight: 750;
+    }
+    .learn-button:hover { background: #dcebdd; }
+    .check-button {
+      display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--line);
+      border-radius: 8px; background: white; color: #6f7b73; cursor: pointer; font-size: 10px; font-weight: 700;
+    }
+    .check-button:hover { border-color: #a7bba9; color: var(--green); }
+    .check-button.done { border-color: #d3e6d6; background: var(--green-soft); color: var(--green); }
+    .check-icon { width: 13px; height: 13px; border: 1px solid currentColor; border-radius: 4px; display: grid; place-items: center; font-size: 9px; line-height: 1; }
+    .check-button.done .check-icon { border-color: var(--green); background: var(--green); color: white; }
+    .empty { display: none; padding: 38px 20px; text-align: center; color: var(--muted); border: 1px dashed #d9ded6; border-radius: 16px; }
+    .empty strong { display: block; margin-bottom: 4px; color: var(--ink); }
+    .lesson-dialog {
+      width: min(660px, calc(100% - 28px)); max-height: min(82vh, 760px); padding: 0;
+      border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--paper);
+      box-shadow: 0 24px 90px rgba(19, 34, 26, .24);
+    }
+    .lesson-dialog::backdrop { background: rgba(22, 33, 27, .48); backdrop-filter: blur(3px); }
+    .lesson-header { padding: 24px 26px 19px; border-bottom: 1px solid var(--line); background: white; }
+    .lesson-header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .lesson-kicker { color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .lesson-close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 10px; background: white; cursor: pointer; font-size: 18px; }
+    .lesson-header h2 { margin: 12px 0 0; font-size: clamp(21px, 4vw, 29px); line-height: 1.2; letter-spacing: -.04em; }
+    .lesson-content { padding: 20px 26px 26px; }
+    .lesson-content h3 { margin: 19px 0 7px; color: var(--green); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .lesson-content h3:first-child { margin-top: 0; }
+    .lesson-content p { margin: 0; color: #56625b; font-size: 14px; }
+    .lesson-content ul { margin: 0; padding-left: 19px; color: #56625b; font-size: 13px; }
+    .lesson-content li + li { margin-top: 6px; }
+    .lesson-formula, .lesson-example { padding: 13px 15px; border-radius: 11px; background: white; color: var(--ink) !important; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px !important; white-space: pre-wrap; }
+    .lesson-example { border-left: 3px solid #d6e5d7; font-family: inherit; }
+    @media (max-width: 600px) {
+      .lesson-header { padding: 20px 18px 16px; }
+      .lesson-content { padding: 17px 18px 22px; }
+    }
+    footer { display: flex; justify-content: space-between; gap: 18px; padding: 24px 0 34px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+
+    @media (max-width: 850px) {
+      .shell { padding: 0 22px; }
+      .topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { grid-template-columns: 1fr 225px; gap: 20px; }
+    }
+    @media (max-width: 600px) {
+      .shell { padding: 0 16px; }
+      .topbar { height: 64px; }
+      .top-meta { gap: 8px; font-size: 10px; }
+      .semester { padding: 6px 8px; }
+      .hero { display: block; padding: 38px 0 28px; }
+      h1 { font-size: 42px; }
+      .hero-copy { font-size: 14px; }
+      .progress-card { margin-top: 22px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .tabs { gap: 4px; }
+      .tab { padding: 8px 11px; font-size: 12px; }
+      .search-wrap { width: 100%; }
+      .topic-grid { grid-template-columns: 1fr; }
+      .topic { min-height: 126px; }
+      .subject-heading h2 { font-size: 17px; }
+      footer { flex-direction: column; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <div class="brand"><span class="brand-mark">∑</span><span>Ruang Belajar</span></div>
+    <div class="top-meta"><span>Rencana materi</span><span class="semester">Semester Ganjil · Nov</span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Peta belajar · 3 mata pelajaran</div>
+        <h1>Belajar, satu<br>materi setiap kali.</h1>
+        <p class="hero-copy">Semua topik yang perlu kamu kuasai, dirangkum dalam satu tempat. Pilih mata pelajaran, cari materi, lalu tandai progres belajarmu.</p>
+      </div>
+      <aside class="progress-card" aria-label="Progres belajar">
+        <div class="progress-top"><span>Progres keseluruhan</span><span id="progress-percent">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-note" id="progress-note">0 dari 31 materi selesai</div>
+      </aside>
+    </section>
+
+    <div class="toolbar">
+      <nav class="tabs" aria-label="Filter mata pelajaran">
+        <button class="tab active" data-filter="all">Semua materi</button>
+        <button class="tab" data-filter="math">Matematika</button>
+        <button class="tab" data-filter="chem">Kimia</button>
+        <button class="tab" data-filter="physics">Fisika</button>
+      </nav>
+      <label class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg>
+        <input class="search" id="search" type="search" placeholder="Cari materi..." aria-label="Cari materi">
+      </label>
+    </div>
+
+    <div id="subjects">
+      <section class="subject-section math" data-subject="math">
+        <div class="subject-heading">
+          <div class="subject-title-wrap"><div class="subject-icon">∫</div><div><h2>Matematika</h2><p>Kalkulus integral &amp; fungsi transenden</p></div></div>
+          <span class="count">18 materi</span>
+        </div>
+
+        <div class="chapter-label">Bab 4 · Integral</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="math-4-2" data-search="luas daerah integral tentu">
+            <div class="topic-top"><span class="topic-number">4.2</span><span class="topic-tag">Integral</span></div>
+            <h3>Luas Daerah &amp; Integral Tentu</h3><p>Memahami integral tentu sebagai luas bertanda dan akumulasi pada suatu interval.</p>
+            <div class="topic-bottom"><span class="topic-hint">Konsep dasar</span><button class="check-button" aria-label="Tandai selesai: Luas Daerah dan Integral Tentu"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-4-3" data-search="teorema dasar kalkulus pertama antiturunan">
+            <div class="topic-top"><span class="topic-number">4.3</span><span class="topic-tag">Teorema</span></div>
+            <h3>Teorema Dasar Kalkulus Pertama</h3><p>Menghubungkan fungsi integral dengan turunan melalui perubahan batas atas.</p>
+            <div class="topic-bottom"><span class="topic-hint">Kalkulus</span><button class="check-button" aria-label="Tandai selesai: Teorema Dasar Kalkulus Pertama"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-4-4" data-search="teorema dasar kalkulus kedua metode substitusi">
+            <div class="topic-top"><span class="topic-number">4.4</span><span class="topic-tag">Teknik integrasi</span></div>
+            <h3>Teorema Dasar Kalkulus Kedua &amp; Substitusi</h3><p>Menghitung integral tentu dengan antiturunan dan menyederhanakan integral melalui substitusi.</p>
+            <div class="topic-bottom"><span class="topic-hint">Kalkulus</span><button class="check-button" aria-label="Tandai selesai: Teorema Dasar Kalkulus Kedua dan Substitusi"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-4-5" data-search="nilai rata-rata integral sifat simetri">
+            <div class="topic-top"><span class="topic-number">4.5</span><span class="topic-tag">Teorema</span></div>
+            <h3>Nilai Rata-rata Integral &amp; Sifat Simetri</h3><p>Menentukan nilai rata-rata fungsi pada interval serta memanfaatkan simetri integral.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi</span><button class="check-button" aria-label="Tandai selesai: Nilai Rata-rata Integral dan Sifat Simetri"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-4-6" data-search="integrasi numerik pendekatan">
+            <div class="topic-top"><span class="topic-number">4.6</span><span class="topic-tag">Metode</span></div>
+            <h3>Integrasi Numerik</h3><p>Memperkirakan nilai integral menggunakan jumlah Riemann, aturan trapesium, dan Simpson.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi</span><button class="check-button" aria-label="Tandai selesai: Integrasi Numerik"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+        </div>
+
+        <div class="chapter-label">Bab 5 · Penggunaan Integral</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="math-5-1" data-search="luas daerah pada bidang">
+            <div class="topic-top"><span class="topic-number">5.1</span><span class="topic-tag">Luas</span></div>
+            <h3>Luas Daerah pada Bidang</h3><p>Menghitung luas wilayah yang dibatasi kurva dengan integral terhadap x atau y.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi integral</span><button class="check-button" aria-label="Tandai selesai: Luas Daerah pada Bidang"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-5-2a" data-search="volume benda putar cakram cincin">
+            <div class="topic-top"><span class="topic-number">5.2.a</span><span class="topic-tag">Volume</span></div>
+            <h3>Volume Benda Putar: Cakram &amp; Cincin</h3><p>Menggunakan luas penampang cakram atau cincin untuk memperoleh volume benda putar.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi integral</span><button class="check-button" aria-label="Tandai selesai: Volume Metode Cakram dan Cincin"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-5-2b" data-search="volume benda putar irisan sejajar">
+            <div class="topic-top"><span class="topic-number">5.2.b</span><span class="topic-tag">Volume</span></div>
+            <h3>Volume Benda Putar: Irisan Sejajar</h3><p>Menyusun volume dari luas penampang yang tegak lurus terhadap sumbu tertentu.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi integral</span><button class="check-button" aria-label="Tandai selesai: Volume Metode Irisan Sejajar"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-5-3" data-search="volume benda putar metode kulit tabung">
+            <div class="topic-top"><span class="topic-number">5.3</span><span class="topic-tag">Volume</span></div>
+            <h3>Volume Benda Putar: Kulit Tabung</h3><p>Menghitung volume dengan menjumlahkan kulit tabung tipis yang terbentuk saat diputar.</p>
+            <div class="topic-bottom"><span class="topic-hint">Aplikasi integral</span><button class="check-button" aria-label="Tandai selesai: Volume Metode Kulit Tabung"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-5-5" data-search="kerja usaha tekanan fluida">
+            <div class="topic-top"><span class="topic-number">5.5</span><span class="topic-tag">Aplikasi</span></div>
+            <h3>Kerja</h3><p>Menggunakan integral untuk menghitung kerja oleh gaya yang berubah-ubah. Tekanan fluida tidak termasuk.</p>
+            <div class="topic-bottom"><span class="topic-hint">Tanpa tekanan fluida</span><button class="check-button" aria-label="Tandai selesai: Kerja"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+        </div>
+
+        <div class="chapter-label">Bab 6 · Fungsi Transenden</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="math-6-1" data-search="fungsi logaritma natural ln">
+            <div class="topic-top"><span class="topic-number">6.1</span><span class="topic-tag">Logaritma</span></div>
+            <h3>Fungsi Logaritma Natural</h3><p>Mengenal ln x melalui integral, sifat-sifatnya, dan grafik fungsi logaritma natural.</p>
+            <div class="topic-bottom"><span class="topic-hint">Fungsi transenden</span><button class="check-button" aria-label="Tandai selesai: Fungsi Logaritma Natural"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-2" data-search="fungsi invers turunannya">
+            <div class="topic-top"><span class="topic-number">6.2</span><span class="topic-tag">Fungsi invers</span></div>
+            <h3>Fungsi Invers &amp; Turunannya</h3><p>Menentukan turunan fungsi invers dan menerapkannya pada fungsi-fungsi terkait.</p>
+            <div class="topic-bottom"><span class="topic-hint">Fungsi transenden</span><button class="check-button" aria-label="Tandai selesai: Fungsi Invers dan Turunannya"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-3" data-search="fungsi eksponen">
+            <div class="topic-top"><span class="topic-number">6.3</span><span class="topic-tag">Eksponen</span></div>
+            <h3>Fungsi Eksponen</h3><p>Mempelajari fungsi eksponen natural sebagai invers logaritma natural beserta turunannya.</p>
+            <div class="topic-bottom"><span class="topic-hint">Fungsi transenden</span><button class="check-button" aria-label="Tandai selesai: Fungsi Eksponen"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-4" data-search="fungsi eksponen logaritma umum">
+            <div class="topic-top"><span class="topic-number">6.4</span><span class="topic-tag">Eksponen &amp; logaritma</span></div>
+            <h3>Fungsi Eksponen &amp; Logaritma Umum</h3><p>Menghubungkan fungsi berpangkat dan logaritma dengan berbagai basis.</p>
+            <div class="topic-bottom"><span class="topic-hint">Fungsi transenden</span><button class="check-button" aria-label="Tandai selesai: Fungsi Eksponen dan Logaritma Umum"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-5" data-search="pertumbuhan peluruhan eksponensial">
+            <div class="topic-top"><span class="topic-number">6.5</span><span class="topic-tag">Aplikasi</span></div>
+            <h3>Pertumbuhan &amp; Peluruhan Eksponensial</h3><p>Menggunakan model eksponensial untuk menggambarkan perubahan populasi, zat, dan besaran lain.</p>
+            <div class="topic-bottom"><span class="topic-hint">Pemodelan</span><button class="check-button" aria-label="Tandai selesai: Pertumbuhan dan Peluruhan Eksponensial"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-6" data-search="persamaan diferensial linear orde satu">
+            <div class="topic-top"><span class="topic-number">6.6</span><span class="topic-tag">Persamaan diferensial</span></div>
+            <h3>Persamaan Diferensial Linear Orde Satu</h3><p>Menyelesaikan persamaan diferensial linear menggunakan faktor integrasi.</p>
+            <div class="topic-bottom"><span class="topic-hint">Metode solusi</span><button class="check-button" aria-label="Tandai selesai: Persamaan Diferensial Linear Orde Satu"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-8" data-search="fungsi invers trigonometri turunannya">
+            <div class="topic-top"><span class="topic-number">6.8</span><span class="topic-tag">Trigonometri</span></div>
+            <h3>Fungsi Invers Trigonometri &amp; Turunannya</h3><p>Mengenal fungsi invers trigonometri dan aturan turunannya.</p>
+            <div class="topic-bottom"><span class="topic-hint">Fungsi transenden</span><button class="check-button" aria-label="Tandai selesai: Fungsi Invers Trigonometri dan Turunannya"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+          <article class="topic" data-id="math-6-9" data-search="fungsi hiperbolik uas">
+            <div class="topic-top"><span class="topic-number">6.9</span><span class="topic-tag">Persiapan UAS</span></div>
+            <h3>Fungsi Hiperbolik</h3><p>Memahami fungsi hiperbolik, identitas dasarnya, dan turunannya.</p>
+            <div class="topic-bottom"><span class="topic-hint">Materi UAS</span><button class="check-button" aria-label="Tandai selesai: Fungsi Hiperbolik"><span class="check-icon"></span><span>Selesai</span></button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="subject-section chem" data-subject="chem">
+        <div class="subject-heading">
+          <div class="subject-title-wrap"><div class="subject-icon">⚗</div><div><h2>Kimia</h2><p>Atom, ikatan, dan sifat materi</p></div></div>
+          <span class="count">6 materi</span>
+        </div>
+        <div class="chapter-label">Struktur &amp; ikatan kimia</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="chem-7" data-search="struktur atom bab 7 referensi 1"><div class="topic-top"><span class="topic-number">Bab 7 · Ref. 1</span><span class="topic-tag">Atom</span></div><h3>Struktur Atom</h3><p>Susunan partikel subatom, konfigurasi elektron, dan gambaran modern tentang atom.</p><div class="topic-bottom"><span class="topic-hint">Kimia dasar</span><button class="check-button" aria-label="Tandai selesai: Struktur Atom"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="chem-8" data-search="dasar dasar ikatan kimia bab 8 referensi 1"><div class="topic-top"><span class="topic-number">Bab 8 · Ref. 1</span><span class="topic-tag">Ikatan</span></div><h3>Dasar-dasar Ikatan Kimia</h3><p>Alasan atom berikatan dan pengantar ikatan ionik, kovalen, serta logam.</p><div class="topic-bottom"><span class="topic-hint">Kimia dasar</span><button class="check-button" aria-label="Tandai selesai: Dasar-dasar Ikatan Kimia"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="chem-9-structure" data-search="struktur molekul bab 9 referensi 1"><div class="topic-top"><span class="topic-number">Bab 9 · Ref. 1</span><span class="topic-tag">Molekul</span></div><h3>Struktur Molekul</h3><p>Memprediksi bentuk molekul dan pengaruh pasangan elektron terhadap geometri.</p><div class="topic-bottom"><span class="topic-hint">Geometri molekul</span><button class="check-button" aria-label="Tandai selesai: Struktur Molekul"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="chem-9-bonding" data-search="teori ikatan kimia bab 9 referensi 1"><div class="topic-top"><span class="topic-number">Bab 9 · Ref. 1</span><span class="topic-tag">Ikatan</span></div><h3>Teori Ikatan Kimia</h3><p>Menjelaskan ikatan molekul melalui pendekatan ikatan valensi dan orbital molekul.</p><div class="topic-bottom"><span class="topic-hint">Model ikatan</span><button class="check-button" aria-label="Tandai selesai: Teori Ikatan Kimia"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+        </div>
+        <div class="chapter-label">Gaya antar molekul &amp; wujud zat</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="chem-11-liquid" data-search="gaya antar molekul sifat cairan bab 11 referensi 1"><div class="topic-top"><span class="topic-number">Bab 11 · Ref. 1</span><span class="topic-tag">Cairan</span></div><h3>Gaya Antarmolekul &amp; Sifat Cairan</h3><p>Hubungan gaya antarmolekul dengan titik didih, tegangan permukaan, dan viskositas.</p><div class="topic-bottom"><span class="topic-hint">Sifat materi</span><button class="check-button" aria-label="Tandai selesai: Gaya Antarmolekul dan Sifat Cairan"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="chem-11-solid" data-search="padatan bab 11 referensi 1"><div class="topic-top"><span class="topic-number">Bab 11 · Ref. 1</span><span class="topic-tag">Padatan</span></div><h3>Padatan</h3><p>Mengenal jenis padatan, susunan partikel, dan karakteristik struktur kristal.</p><div class="topic-bottom"><span class="topic-hint">Sifat materi</span><button class="check-button" aria-label="Tandai selesai: Padatan"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+        </div>
+      </section>
+
+      <section class="subject-section physics" data-subject="physics">
+        <div class="subject-heading">
+          <div class="subject-title-wrap"><div class="subject-icon">↗</div><div><h2>Fisika</h2><p>Mekanika, fluida, dan gelombang</p></div></div>
+          <span class="count">7 materi</span>
+        </div>
+        <div class="chapter-label">Mekanika &amp; fluida</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="physics-momentum" data-search="pusat massa momentum"><div class="topic-top"><span class="topic-number">Mekanika</span><span class="topic-tag">Gerak</span></div><h3>Pusat Massa &amp; Momentum</h3><p>Meninjau gerak sistem partikel, pusat massa, impuls, dan kekekalan momentum.</p><div class="topic-bottom"><span class="topic-hint">Mekanika</span><button class="check-button" aria-label="Tandai selesai: Pusat Massa dan Momentum"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="physics-rotation" data-search="gerak rotasi"><div class="topic-top"><span class="topic-number">Mekanika</span><span class="topic-tag">Rotasi</span></div><h3>Gerak Rotasi</h3><p>Besaran sudut, momen gaya, momen inersia, dan dinamika benda tegar berotasi.</p><div class="topic-bottom"><span class="topic-hint">Mekanika</span><button class="check-button" aria-label="Tandai selesai: Gerak Rotasi"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="physics-rolling" data-search="gerak menggelinding menggelinding"><div class="topic-top"><span class="topic-number">Mekanika</span><span class="topic-tag">Rotasi</span></div><h3>Gerak Menggelinding</h3><p>Gerak gabungan translasi dan rotasi pada benda yang menggelinding.</p><div class="topic-bottom"><span class="topic-hint">Mekanika</span><button class="check-button" aria-label="Tandai selesai: Gerak Menggelinding"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="physics-equilibrium" data-search="kesetimbangan elastisitas"><div class="topic-top"><span class="topic-number">Mekanika</span><span class="topic-tag">Benda tegar</span></div><h3>Kesetimbangan &amp; Elastisitas</h3><p>Syarat kesetimbangan benda tegar, tegangan, regangan, dan sifat elastis bahan.</p><div class="topic-bottom"><span class="topic-hint">Mekanika</span><button class="check-button" aria-label="Tandai selesai: Kesetimbangan dan Elastisitas"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="physics-fluid" data-search="fluida"><div class="topic-top"><span class="topic-number">Mekanika</span><span class="topic-tag">Fluida</span></div><h3>Fluida</h3><p>Tekanan, prinsip Pascal dan Archimedes, serta konsep dasar fluida bergerak.</p><div class="topic-bottom"><span class="topic-hint">Mekanika</span><button class="check-button" aria-label="Tandai selesai: Fluida"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+        </div>
+        <div class="chapter-label">Osilasi &amp; gelombang</div>
+        <div class="topic-grid">
+          <article class="topic" data-id="physics-oscillation" data-search="osilasi harmonik"><div class="topic-top"><span class="topic-number">Gelombang</span><span class="topic-tag">Periodik</span></div><h3>Osilasi</h3><p>Gerak harmonik sederhana, periode, frekuensi, dan pertukaran energi pada osilasi.</p><div class="topic-bottom"><span class="topic-hint">Gelombang</span><button class="check-button" aria-label="Tandai selesai: Osilasi"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+          <article class="topic" data-id="physics-wave" data-search="gelombang mekanik"><div class="topic-top"><span class="topic-number">Gelombang</span><span class="topic-tag">Gelombang</span></div><h3>Gelombang Mekanik</h3><p>Perambatan gelombang, hubungan cepat rambat, panjang gelombang, dan frekuensi.</p><div class="topic-bottom"><span class="topic-hint">Gelombang</span><button class="check-button" aria-label="Tandai selesai: Gelombang Mekanik"><span class="check-icon"></span><span>Selesai</span></button></div></article>
+        </div>
+      </section>
+    </div>
+    <div class="empty" id="empty"><strong>Materi tidak ditemukan</strong>Coba kata kunci lain atau pilih mata pelajaran yang berbeda.</div>
+  </main>
+
+  <footer class="shell"><span>Ruang Belajar · Peta materi semester ganjil</span><span>Belajar konsisten, selangkah demi selangkah.</span></footer>
+
+  <dialog class="lesson-dialog" id="lesson-dialog" aria-labelledby="lesson-title">
+    <div class="lesson-header">
+      <div class="lesson-header-top"><span class="lesson-kicker" id="lesson-kicker"></span><button class="lesson-close" id="lesson-close" type="button" aria-label="Tutup materi">×</button></div>
+      <h2 id="lesson-title"></h2>
+    </div>
+    <div class="lesson-content">
+      <h3>Gambaran materi</h3><p id="lesson-summary"></p>
+      <h3>Konsep penting</h3><ul id="lesson-points"></ul>
+      <h3 id="lesson-formula-heading">Rumus kunci</h3><p class="lesson-formula" id="lesson-formula"></p>
+      <h3>Contoh singkat</h3><p class="lesson-example" id="lesson-example"></p>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      var storageKey = "ruang-belajar-completed";
+      var completed = {};
+      try {
+        completed = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      } catch (error) {
+        completed = {};
+      }
+
+      var cards = Array.prototype.slice.call(document.querySelectorAll(".topic"));
+      var sections = Array.prototype.slice.call(document.querySelectorAll(".subject-section"));
+      var buttons = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+      var search = document.getElementById("search");
+      var activeFilter = "all";
+      var lessons = {
+        "math-4-2": {
+          summary: "Integral tentu menjumlahkan kontribusi kecil pada interval tertentu. Untuk fungsi positif, nilainya dapat ditafsirkan sebagai luas daerah di bawah kurva; jika fungsi negatif, luasnya dihitung sebagai nilai bertanda.",
+          points: ["Batas bawah dan batas atas menentukan interval integrasi.", "Integral tentu memiliki nilai numerik, bukan keluarga antiturunan.", "Luas geometris antara kurva dan sumbu x perlu memperhatikan bagian kurva yang berada di bawah sumbu."],
+          formula: "∫ₐᵇ f(x) dx = F(b) − F(a), jika F′(x) = f(x)",
+          example: "∫₀² x dx = [x²/2]₀² = 2. Grafik y = x berada di atas sumbu x pada interval ini, sehingga luasnya juga 2 satuan luas."
+        },
+        "math-4-3": {
+          summary: "Teorema Dasar Kalkulus Pertama menyatakan bahwa fungsi yang dibentuk dari integral dengan batas atas variabel memiliki turunan yang mengembalikan integrannya.",
+          points: ["Jika G(x) = ∫ₐˣ f(t) dt dan f kontinu, maka G′(x) = f(x).", "Variabel t adalah variabel bantu; hasil fungsi bergantung pada x.", "Untuk batas atas g(x), gunakan aturan rantai."],
+          formula: "d/dx ∫ₐˣ f(t) dt = f(x)\nd/dx ∫ₐᵍ⁽ˣ⁾ f(t) dt = f(g(x)) · g′(x)",
+          example: "Jika G(x) = ∫₁ˣ (t² + 1) dt, maka G′(x) = x² + 1. Jika batas atasnya x², turunannya menjadi (x⁴ + 1) · 2x."
+        },
+        "math-4-4": {
+          summary: "Teorema Dasar Kalkulus Kedua menghitung integral tentu menggunakan antiturunan. Substitusi u mengubah integral rumit menjadi bentuk yang lebih sederhana.",
+          points: ["Cari antiturunan F dari f, lalu hitung F(b) − F(a).", "Pada integral tentu, batas juga berubah saat melakukan substitusi.", "Pilih u sebagai fungsi bagian dalam yang turunannya muncul pada integran."],
+          formula: "∫ₐᵇ f(x) dx = F(b) − F(a)\nJika u = g(x), maka du = g′(x) dx",
+          example: "∫₀¹ 2x cos(x²) dx. Ambil u = x² dan du = 2x dx, sehingga hasilnya ∫₀¹ cos(u) du = sin(1)."
+        },
+        "math-4-5": {
+          summary: "Teorema nilai rata-rata untuk integral menjamin ada suatu titik ketika nilai fungsi sama dengan nilai rata-ratanya. Simetri dapat membuat integral lebih cepat dihitung.",
+          points: ["Nilai rata-rata fungsi kontinu pada [a,b] adalah luas bertanda dibagi panjang interval.", "Fungsi genap simetris terhadap sumbu y; fungsi ganjil simetris terhadap titik asal.", "Gunakan simetri hanya jika interval dan fungsi memenuhi syaratnya."],
+          formula: "f rata-rata = (1/(b−a)) ∫ₐᵇ f(x) dx\nGenap: ∫₋ₐᵃ f = 2∫₀ᵃ f\nGanjil: ∫₋ₐᵃ f = 0",
+          example: "Untuk f(x) = x² pada [−1,1], fungsi genap sehingga ∫₋₁¹ x² dx = 2∫₀¹ x² dx = 2/3. Nilai rata-ratanya adalah (2/3)/2 = 1/3."
+        },
+        "math-4-6": {
+          summary: "Integrasi numerik memperkirakan nilai integral ketika antiturunan sulit ditemukan atau data hanya tersedia dalam bentuk tabel.",
+          points: ["Aturan trapesium menghubungkan titik-titik dengan garis lurus.", "Aturan Simpson memakai parabola dan biasanya mensyaratkan jumlah subinterval genap.", "Memperbanyak subinterval umumnya meningkatkan ketelitian untuk fungsi yang cukup mulus."],
+          formula: "Trapesium: Tₙ = (h/2)[f(x₀) + 2Σf(xᵢ) + f(xₙ)]\nSimpson: Sₙ = (h/3)[f(x₀) + 4f(x₁) + 2f(x₂) + … + f(xₙ)]",
+          example: "Untuk ∫₀¹ x² dx dengan satu trapesium, T = (1/2)(0 + 1) = 0,5. Nilai tepatnya 1/3; menambah subinterval memperbaiki pendekatan trapesium."
+        },
+        "math-5-1": {
+          summary: "Luas daerah di antara dua kurva diperoleh dengan mengintegralkan selisih kurva atas dan kurva bawah. Jika lebih mudah, irisan horizontal dapat digunakan sebagai gantinya.",
+          points: ["Gambarkan kurva dan tentukan titik perpotongan sebagai batas.", "Pastikan fungsi atas/bawah (atau kanan/kiri) konsisten sepanjang interval.", "Jika urutan kurva berubah, bagi daerah menjadi beberapa integral."],
+          formula: "A = ∫ₐᵇ [f_atas(x) − f_bawah(x)] dx\natau A = ∫ [x_kanan(y) − x_kiri(y)] dy",
+          example: "Daerah di antara y = x dan y = x² pada [0,1] memiliki luas ∫₀¹(x − x²) dx = 1/2 − 1/3 = 1/6."
+        },
+        "math-5-2a": {
+          summary: "Metode cakram dan cincin menghitung volume benda putar dari penampang melintang berbentuk lingkaran. Cakram tidak memiliki lubang; cincin memiliki jari-jari dalam.",
+          points: ["Tentukan sumbu putar dan jari-jari luar R.", "Jika ada lubang, tentukan jari-jari dalam r.", "Jari-jari diukur tegak lurus dari kurva ke sumbu putar."],
+          formula: "Cakram: V = π∫ₐᵇ R(x)² dx\nCincin: V = π∫ₐᵇ [R(x)² − r(x)²] dx",
+          example: "Memutar daerah di bawah y = x, 0 ≤ x ≤ 1, terhadap sumbu x menghasilkan cakram: V = π∫₀¹ x² dx = π/3."
+        },
+        "math-5-2b": {
+          summary: "Metode irisan sejajar menyusun volume dari penampang-penampang tipis. Bentuk penampang dapat berbeda-beda selama luasnya dapat dinyatakan sebagai fungsi posisi.",
+          points: ["Pilih arah irisan sehingga penampang mudah dihitung.", "Nyatakan luas penampang A(x) atau A(y).", "Jumlahkan luas penampang sepanjang panjang benda."],
+          formula: "V = ∫ₐᵇ A(x) dx\nContoh luas penampang persegi: A(x) = [panjang sisi(x)]²",
+          example: "Jika penampang tegak lurus sumbu x berupa persegi dengan sisi s(x) = x pada 0 ≤ x ≤ 1, maka V = ∫₀¹ x² dx = 1/3 satuan kubik."
+        },
+        "math-5-3": {
+          summary: "Metode kulit tabung membagi benda putar menjadi kulit silinder tipis. Metode ini sering lebih praktis ketika penampang cakram akan memerlukan fungsi invers.",
+          points: ["Jari-jari kulit adalah jarak ke sumbu putar.", "Tinggi kulit adalah selisih kurva pembatas.", "Pastikan variabel irisan sejajar dengan sumbu putar."],
+          formula: "V = 2π∫ₐᵇ (jari-jari)(tinggi) dx",
+          example: "Daerah di bawah y = x pada [0,1], diputar terhadap sumbu y: V = 2π∫₀¹ x·x dx = 2π/3."
+        },
+        "math-5-5": {
+          summary: "Kerja oleh gaya yang berubah sepanjang lintasan dihitung dengan menjumlahkan gaya pada setiap perpindahan kecil. Bagian tekanan fluida tidak termasuk dalam materi ini.",
+          points: ["Untuk gaya konstan searah gerak, kerja adalah gaya kali perpindahan.", "Untuk gaya berubah terhadap posisi, integralkan F(x).", "Pada pegas ideal, gaya mengikuti hukum Hooke dan berlawanan arah dengan simpangan."],
+          formula: "W = ∫ₐᵇ F(x) dx\nPegas ideal: |F(x)| = kx",
+          example: "Pegas dengan konstanta k diregangkan dari 0 sampai a. Kerja yang diperlukan adalah ∫₀ᵃ kx dx = ½ka²."
+        },
+        "math-6-1": {
+          summary: "Logaritma natural ln x adalah invers dari fungsi eksponen eˣ. Untuk x positif, ln x juga dapat didefinisikan sebagai integral dari 1/t.",
+          points: ["Domain ln x adalah x > 0 dan ln 1 = 0.", "ln(ab) = ln a + ln b serta ln(a/b) = ln a − ln b untuk a,b > 0.", "Turunan ln x adalah 1/x."],
+          formula: "ln x = ∫₁ˣ (1/t) dt\nd/dx ln x = 1/x\neˡⁿ ˣ = x",
+          example: "ln(e³) = 3. Dengan aturan rantai, turunan ln(2x + 1) adalah 2/(2x + 1), untuk x > −1/2."
+        },
+        "math-6-2": {
+          summary: "Turunan fungsi invers diperoleh dari hubungan bahwa fungsi dan inversnya saling membatalkan. Rumus ini berlaku di daerah ketika fungsi memiliki invers dan turunannya tidak nol.",
+          points: ["Grafik fungsi invers merupakan pencerminan terhadap garis y = x.", "Jika f(a) = b, maka (f⁻¹)′(b) = 1/f′(a), selama f′(a) ≠ 0.", "Tentukan domain dan cabang fungsi sebelum mencari invers."],
+          formula: "(f⁻¹)′(x) = 1 / f′(f⁻¹(x))",
+          example: "Untuk f(x) = x² pada x ≥ 0, inversnya √x. Maka turunan invers adalah 1/(2√x), untuk x > 0."
+        },
+        "math-6-3": {
+          summary: "Fungsi eksponen natural eˣ adalah invers dari ln x. Fungsi ini unik karena laju perubahannya sama dengan nilainya.",
+          points: ["eˣ selalu positif dan grafiknya melalui (0,1).", "Turunan eˣ adalah eˣ; aturan rantai berlaku pada eᵍ⁽ˣ⁾.", "Integral eˣ adalah eˣ + C."],
+          formula: "d/dx eˣ = eˣ\nd/dx eᵍ⁽ˣ⁾ = eᵍ⁽ˣ⁾ · g′(x)",
+          example: "Jika y = e³ˣ, maka y′ = 3e³ˣ. Faktor 3 berasal dari turunan pangkat 3x."
+        },
+        "math-6-4": {
+          summary: "Eksponen dan logaritma dengan basis umum a dapat ditulis menggunakan basis e. Hubungan ini memudahkan perhitungan turunan dan penyelesaian persamaan.",
+          points: ["Untuk a > 0 dan a ≠ 1, logₐ x adalah invers dari aˣ.", "Basis a dapat diubah dengan logaritma natural.", "Jika a > 1, aˣ naik; jika 0 < a < 1, aˣ turun."],
+          formula: "aˣ = eˣˡⁿ ᵃ\nlogₐ x = ln x / ln a\nd/dx aˣ = aˣ ln a",
+          example: "Turunan 2ˣ adalah 2ˣ ln 2. Selain itu, log₂ 8 = ln 8 / ln 2 = 3."
+        },
+        "math-6-5": {
+          summary: "Model eksponensial digunakan ketika laju perubahan suatu besaran sebanding dengan besar besaran tersebut. Tanda konstanta menentukan pertumbuhan atau peluruhan.",
+          points: ["Model kontinu memenuhi persamaan P′ = kP.", "k > 0 menyatakan pertumbuhan; k < 0 menyatakan peluruhan.", "Waktu paruh untuk peluruhan memenuhi t₁/₂ = ln 2/|k|."],
+          formula: "P(t) = P₀eᵏᵗ",
+          example: "Populasi awal 100 bertumbuh dengan laju kontinu 5% per satuan waktu: P(t) = 100e⁰·⁰⁵ᵗ. Setelah 10 satuan waktu, P ≈ 165."
+        },
+        "math-6-6": {
+          summary: "Persamaan diferensial linear orde satu memiliki bentuk y′ + p(x)y = q(x). Faktor integrasi mengubah ruas kiri menjadi turunan hasil kali sehingga persamaan dapat diintegralkan.",
+          points: ["Tulis persamaan dalam bentuk standar dengan koefisien y′ sama dengan 1.", "Faktor integrasi adalah μ(x) = e^(∫p(x)dx).", "Kalikan seluruh persamaan dengan μ, lalu integralkan kedua ruas."],
+          formula: "μ(x) = e^(∫p(x) dx)\n(μy)′ = μq",
+          example: "y′ + 2y = 4 memiliki μ = e²ˣ. Maka (e²ˣy)′ = 4e²ˣ, sehingga y = 2 + Ce⁻²ˣ."
+        },
+        "math-6-8": {
+          summary: "Fungsi invers trigonometri mengembalikan sudut dari nilai perbandingan trigonometri. Karena fungsi trigonometrik periodik, domainnya dibatasi agar invers terdefinisi sebagai fungsi.",
+          points: ["Nilai utama arcsin berada pada [−π/2, π/2]; arctan pada (−π/2, π/2).", "Periksa domain turunan, terutama pada penyebut akar.", "Turunan diperoleh dari rumus invers dan aturan rantai."],
+          formula: "d/dx arcsin x = 1/√(1−x²)\nd/dx arctan x = 1/(1+x²)",
+          example: "Turunan arctan(2x) adalah 2/(1 + 4x²), dengan menggunakan aturan rantai."
+        },
+        "math-6-9": {
+          summary: "Fungsi hiperbolik dibangun dari eksponen dan memiliki identitas yang mirip dengan fungsi trigonometri, tetapi tanda identitas dasarnya berbeda.",
+          points: ["sinh x dan cosh x tersusun dari eˣ dan e⁻ˣ.", "Identitas dasar: cosh²x − sinh²x = 1.", "Turunan sinh adalah cosh; turunan cosh adalah sinh."],
+          formula: "sinh x = (eˣ − e⁻ˣ)/2\ncosh x = (eˣ + e⁻ˣ)/2\ntanh x = sinh x / cosh x",
+          example: "d/dx sinh(3x) = 3cosh(3x). Faktor 3 muncul dari aturan rantai."
+        },
+        "chem-7": {
+          summary: "Atom tersusun atas inti yang mengandung proton dan neutron, serta elektron yang menempati orbital. Nomor atom menentukan jumlah proton dan identitas unsur.",
+          points: ["Nomor massa A = jumlah proton + jumlah neutron.", "Atom netral memiliki jumlah elektron sama dengan jumlah proton.", "Elektron mengisi tingkat energi dan orbital mengikuti aturan Aufbau, Pauli, dan Hund."],
+          formula: "Z = jumlah proton\nA = jumlah proton + jumlah neutron\nMuatan ion = jumlah proton − jumlah elektron",
+          example: "Natrium-23 memiliki Z = 11, sehingga memiliki 11 proton dan 12 neutron. Atom Na netral memiliki 11 elektron; Na⁺ memiliki 10."
+        },
+        "chem-8": {
+          summary: "Ikatan kimia terbentuk melalui interaksi elektron valensi. Atom dapat berbagi elektron atau membentuk ion untuk mencapai susunan yang lebih stabil.",
+          points: ["Ikatan ionik melibatkan tarikan antara ion bermuatan berlawanan.", "Ikatan kovalen terbentuk saat atom berbagi pasangan elektron.", "Ikatan logam melibatkan elektron valensi yang terdelokalisasi."],
+          formula: "Muatan total senyawa ionik harus netral.\nContoh: Mg²⁺ + 2Cl⁻ → MgCl₂",
+          example: "Magnesium melepas dua elektron menjadi Mg²⁺. Dua atom klorin masing-masing menerima satu elektron sehingga terbentuk MgCl₂ yang netral."
+        },
+        "chem-9-structure": {
+          summary: "Struktur molekul menggambarkan susunan tiga dimensi atom. Model VSEPR memperkirakan bentuk dengan meminimalkan tolakan antardaerah elektron di sekitar atom pusat.",
+          points: ["Gambarkan struktur Lewis dan hitung daerah elektron pada atom pusat.", "Ikatan rangkap dihitung sebagai satu daerah elektron dalam VSEPR.", "Pasangan elektron bebas lebih kuat menolak dan dapat memperkecil sudut ikatan."],
+          formula: "2 daerah: linear · 3: trigonal planar · 4: tetrahedral\nBentuk molekul mempertimbangkan posisi atom, bukan pasangan bebas.",
+          example: "CH₄ memiliki empat pasangan ikatan di sekitar C sehingga berbentuk tetrahedral dengan sudut sekitar 109,5°. NH₃ juga memiliki empat daerah elektron, tetapi bentuk molekulnya piramida trigonal."
+        },
+        "chem-9-bonding": {
+          summary: "Teori ikatan valensi memandang ikatan sebagai tumpang tindih orbital atom. Teori orbital molekul memandang orbital sebagai keadaan yang mencakup seluruh molekul.",
+          points: ["Hibridisasi membantu menjelaskan arah ikatan dan geometri molekul.", "Ikatan sigma terbentuk dari tumpang tindih sepanjang sumbu antarinti.", "Orbital molekul ikatan menurunkan energi; orbital antiikatan menaikkan energi."],
+          formula: "Orde ikatan = (elektron pada orbital ikatan − elektron antiikatan)/2",
+          example: "Dalam model orbital molekul O₂, orde ikatannya 2 dan terdapat elektron tidak berpasangan, sehingga O₂ bersifat paramagnetik."
+        },
+        "chem-11-liquid": {
+          summary: "Gaya antarmolekul adalah tarikan antarpartikel yang memengaruhi sifat fisik zat. Gaya yang lebih kuat umumnya memerlukan energi lebih besar untuk memisahkan molekul.",
+          points: ["Gaya dispersi terdapat pada semua atom dan molekul.", "Molekul polar mengalami gaya dipol-dipol; ikatan hidrogen adalah kasus kuat ketika H terikat pada N, O, atau F.", "Gaya antarmolekul memengaruhi titik didih, viskositas, dan tegangan permukaan."],
+          formula: "Untuk cairan yang sama, gaya antarmolekul lebih kuat biasanya → titik didih lebih tinggi dan tekanan uap lebih rendah.",
+          example: "Air memiliki titik didih relatif tinggi untuk molekul kecil karena terbentuk jaringan ikatan hidrogen antarmolekul."
+        },
+        "chem-11-solid": {
+          summary: "Padatan memiliki bentuk dan volume yang relatif tetap karena partikelnya tersusun rapat. Sifat padatan bergantung pada jenis partikel dan ikatan yang menyusunnya.",
+          points: ["Padatan kristalin memiliki susunan teratur dan pola berulang.", "Padatan amorf tidak memiliki keteraturan jangka panjang.", "Padatan ionik, molekuler, kovalen jaringan, dan logam memiliki sifat berbeda."],
+          formula: "Kerapatan: ρ = massa / volume\nUntuk sel satuan, massa sel dihitung dari jumlah partikel dan massa molarnya.",
+          example: "NaCl membentuk kristal ionik. Kristalnya keras dan rapuh, serta dapat menghantarkan listrik saat meleleh atau dilarutkan, tetapi tidak saat padat."
+        },
+        "physics-momentum": {
+          summary: "Pusat massa merangkum posisi rata-rata massa suatu sistem. Momentum total adalah jumlah momentum semua benda dan tetap jika resultan gaya luar pada sistem nol.",
+          points: ["Pusat massa bergerak seolah seluruh massa sistem terkumpul di sana untuk gerak translasi.", "Impuls sama dengan perubahan momentum.", "Dalam tumbukan, momentum kekal pada sistem terisolasi; energi kinetik hanya kekal pada tumbukan lenting sempurna."],
+          formula: "r_cm = (Σmᵢrᵢ)/(Σmᵢ)\np = mv · J = Δp",
+          example: "Benda 2 kg bergerak 3 m/s menumbuk benda diam 1 kg dan keduanya melekat. Kecepatan akhirnya dari kekekalan momentum: (2·3)/(2+1) = 2 m/s."
+        },
+        "physics-rotation": {
+          summary: "Gerak rotasi mendeskripsikan perubahan sudut benda tegar. Momen gaya menyebabkan perubahan momentum sudut, sebagaimana gaya menyebabkan perubahan momentum linear.",
+          points: ["Hubungan kinematika sudut sepadan dengan kinematika linear.", "Momen inersia bergantung pada massa dan distribusinya terhadap sumbu.", "Momen gaya tegak lurus lengan gaya menghasilkan efek putar maksimum."],
+          formula: "τ = r × F\nτ_net = Iα\nK_rotasi = ½Iω²",
+          example: "Gaya 10 N tegak lurus pada gagang sepanjang 0,2 m menghasilkan momen gaya 2 N·m terhadap poros."
+        },
+        "physics-rolling": {
+          summary: "Menggelinding tanpa slip adalah gabungan gerak translasi pusat massa dan rotasi terhadap pusat massa. Titik kontak sesaat diam terhadap permukaan.",
+          points: ["Untuk menggelinding tanpa slip, kecepatan translasi dan sudut terhubung.", "Energi kinetik total terdiri atas energi translasi dan rotasi.", "Gesekan statis dapat menyediakan torsi tanpa selalu melakukan kerja pada titik kontak."],
+          formula: "v_cm = Rω\na_cm = Rα\nK = ½Mv_cm² + ½I_cmω²",
+          example: "Roda berjari-jari 0,3 m berputar dengan ω = 10 rad/s tanpa slip. Kecepatan pusat massanya v = Rω = 3 m/s."
+        },
+        "physics-equilibrium": {
+          summary: "Benda tegar seimbang jika tidak mengalami percepatan translasi maupun percepatan sudut. Elastisitas menjelaskan perubahan bentuk bahan akibat gaya.",
+          points: ["Kesetimbangan statis mensyaratkan resultan gaya dan resultan momen gaya sama dengan nol.", "Tegangan adalah gaya per luas penampang; regangan adalah perubahan relatif panjang.", "Modulus Young mengukur kekakuan bahan dalam batas elastis."],
+          formula: "ΣF = 0 dan Στ = 0\nTegangan = F/A\nModulus Young: Y = (F/A)/(ΔL/L₀)",
+          example: "Batang panjang 2 m bertambah panjang 1 mm. Regangan tariknya adalah ΔL/L₀ = 0,001/2 = 0,0005."
+        },
+        "physics-fluid": {
+          summary: "Fluida mencakup zat cair dan gas. Fluida statis dikaji melalui tekanan dan gaya apung; fluida bergerak dapat dijelaskan dengan kontinuitas dan Bernoulli pada kondisi ideal.",
+          points: ["Tekanan adalah gaya per luas dan bertambah dengan kedalaman dalam fluida diam.", "Gaya apung sama dengan berat fluida yang dipindahkan.", "Persamaan Bernoulli menghubungkan tekanan, kelajuan, dan ketinggian aliran ideal."],
+          formula: "P = F/A\nP = P₀ + ρgh\nF_apung = ρ_fluida g V_terdesak",
+          example: "Di air, tekanan ukur pada kedalaman 2 m adalah ρgh ≈ 1000·9,8·2 = 19.600 Pa."
+        },
+        "physics-oscillation": {
+          summary: "Osilasi adalah gerak bolak-balik di sekitar posisi setimbang. Pada gerak harmonik sederhana, gaya pemulih sebanding dengan simpangan dan berlawanan arah.",
+          points: ["Simpangan berubah periodik terhadap waktu.", "Energi bertukar antara energi kinetik dan energi potensial.", "Periode pegas bergantung pada massa dan konstanta pegas; periode bandul sederhana berlaku untuk simpangan kecil."],
+          formula: "x(t) = A cos(ωt + φ)\nPegas: T = 2π√(m/k)\nBandul kecil: T = 2π√(L/g)",
+          example: "Massa 1 kg pada pegas dengan k = 4 N/m memiliki periode T = 2π√(1/4) = π s."
+        },
+        "physics-wave": {
+          summary: "Gelombang mekanik merambat melalui medium dan membawa energi tanpa memindahkan materi secara keseluruhan. Gelombang dapat berupa transversal atau longitudinal.",
+          points: ["Amplitudo berkaitan dengan energi gelombang.", "Frekuensi ditentukan sumber; cepat rambat bergantung pada medium.", "Pantulan, interferensi, dan gelombang berdiri merupakan gejala gelombang."],
+          formula: "v = fλ\nGelombang sinus: y(x,t) = A sin(kx − ωt)",
+          example: "Gelombang pada tali memiliki panjang gelombang 0,5 m dan frekuensi 8 Hz. Cepat rambatnya v = fλ = 4 m/s."
+        }
+      };
+
+      var dialog = document.getElementById("lesson-dialog");
+      var closeLesson = document.getElementById("lesson-close");
+      var activeLessonButton = null;
+
+      function openLesson(card, button) {
+        var lesson = lessons[card.dataset.id];
+        if (!lesson) {
+          console.error("Konten materi belum tersedia untuk " + card.dataset.id);
+          return;
+        }
+        activeLessonButton = button;
+        document.getElementById("lesson-kicker").textContent =
+          card.querySelector(".topic-number").textContent + " · " +
+          card.closest(".subject-section").querySelector("h2").textContent;
+        document.getElementById("lesson-title").textContent = card.querySelector("h3").textContent;
+        document.getElementById("lesson-summary").textContent = lesson.summary;
+        var points = document.getElementById("lesson-points");
+        points.replaceChildren();
+        lesson.points.forEach(function (point) {
+          var item = document.createElement("li");
+          item.textContent = point;
+          points.appendChild(item);
+        });
+        document.getElementById("lesson-formula").textContent = lesson.formula;
+        document.getElementById("lesson-example").textContent = lesson.example;
+        dialog.showModal();
+      }
+
+      cards.forEach(function (card) {
+        var learnButton = document.createElement("button");
+        learnButton.className = "learn-button";
+        learnButton.type = "button";
+        learnButton.textContent = "Pelajari →";
+        learnButton.setAttribute("aria-label", "Buka materi: " + card.querySelector("h3").textContent);
+        learnButton.addEventListener("click", function () { openLesson(card, learnButton); });
+        card.querySelector(".topic-bottom").insertBefore(learnButton, card.querySelector(".check-button"));
+      });
+
+      closeLesson.addEventListener("click", function () { dialog.close(); });
+      dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) { dialog.close(); }
+      });
+      dialog.addEventListener("close", function () {
+        if (activeLessonButton) {
+          activeLessonButton.focus();
+          activeLessonButton = null;
+        }
+      });
+
+      function updateProgress() {
+        var done = cards.filter(function (card) { return completed[card.dataset.id]; }).length;
+        var percent = cards.length ? Math.round(done / cards.length * 100) : 0;
+        document.getElementById("progress-percent").textContent = percent + "%";
+        document.getElementById("progress-fill").style.width = percent + "%";
+        document.getElementById("progress-note").textContent = done + " dari " + cards.length + " materi selesai";
+      }
+
+      cards.forEach(function (card) {
+        var button = card.querySelector(".check-button");
+        function renderState() {
+          var isDone = Boolean(completed[card.dataset.id]);
+          button.classList.toggle("done", isDone);
+          button.querySelector(".check-icon").textContent = isDone ? "✓" : "";
+          button.querySelector("span:last-child").textContent = isDone ? "Selesai" : "Tandai";
+          button.setAttribute("aria-pressed", String(isDone));
+        }
+        button.addEventListener("click", function () {
+          if (completed[card.dataset.id]) {
+            delete completed[card.dataset.id];
+          } else {
+            completed[card.dataset.id] = true;
+          }
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(completed));
+          } catch (error) {
+            console.warn("Progres tidak dapat disimpan di browser ini.", error);
+          }
+          renderState();
+          updateProgress();
+        });
+        renderState();
+      });
+
+      function filterCards() {
+        var query = search.value.trim().toLocaleLowerCase("id");
+        var visibleCount = 0;
+        sections.forEach(function (section) {
+          var subjectMatches = activeFilter === "all" || section.dataset.subject === activeFilter;
+          var sectionVisible = false;
+          section.querySelectorAll(".topic").forEach(function (card) {
+            var searchable = (card.textContent + " " + (card.dataset.search || "")).toLocaleLowerCase("id");
+            var matches = subjectMatches && (!query || searchable.indexOf(query) !== -1);
+            card.hidden = !matches;
+            if (matches) { sectionVisible = true; visibleCount += 1; }
+          });
+          section.hidden = !sectionVisible;
+          section.querySelectorAll(".chapter-label").forEach(function (label) {
+            var next = label.nextElementSibling;
+            label.hidden = !next || !Array.prototype.some.call(next.querySelectorAll(".topic"), function (card) {
+              return !card.hidden;
+            });
+          });
+        });
+        document.getElementById("empty").style.display = visibleCount ? "none" : "block";
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          activeFilter = button.dataset.filter;
+          buttons.forEach(function (item) { item.classList.toggle("active", item === button); });
+          filterCards();
+        });
+      });
+      search.addEventListener("input", filterCards);
+      updateProgress();
+      filterCards();
+    }());
+  </script>
+</body>
+</html>
